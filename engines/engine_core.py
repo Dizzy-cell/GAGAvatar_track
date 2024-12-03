@@ -127,10 +127,18 @@ class CoreEngine:
                 if vgg_results is None:
                     continue
                 emica_results, vgg_results = self._process_emica_vgg(emica_results, vgg_results, lmks_2d70)
+
+                temp = image.cpu().permute(1,2,0).numpy()
+                frame_rgb = temp.astype(np.unit8)
+                landmarks, blendshape, matrix = self.faceDetector.update(frame_rgb)
+
                 base_results[image_key] = {
                     'emica_results': emica_results, 
                     'vgg_results': vgg_results, 
-                    'bbox': bbox.cpu().numpy() / 512.0
+                    'bbox': bbox.cpu().numpy() / 512.0,
+                    'landmarks': landmarks,
+                    'blend': blendshape,
+                    'matirx':matrix,
                 }
             if output_path is not None:
                 with open(os.path.join(output_path, 'base.pkl'), 'wb') as f:
@@ -167,14 +175,18 @@ class CoreEngine:
                     pickle.dump(optim_results, f)
             return optim_results
 
-    def track_image(self, inp_images, inp_keys, if_matting=True):
+    def track_image(self, inp_images, inp_keys, if_matting=True, crop_image = True):
         assert type(inp_images) == list, f'Image must be a list, but got {type(inp_images)}.'
         assert inp_images[0].dim() == 3, f'Image dim must be 3, but got {inp_images[0].dim()}.'
         assert inp_images[0].max() > 1.0, f'Image in [0, 255.0], but got {inp_images[0].max()}.'
         assert len(inp_images) == len(inp_keys), f'Image and key length must be equal, but got {inp_images.shape[0]} and {len(inp_keys)}.'
         croped_images, croped_keys = [], []
         for inp_key, inp_image in tqdm(zip(inp_keys, inp_images), total=len(inp_images)):
-            croped_image = self.crop_image(inp_image)
+            if crop_image: 
+                croped_image = self.crop_image(inp_image)
+            else:
+                croped_image = inp_image
+
             if inp_image is not None:
                 if if_matting:
                     croped_image = self.matting_engine.forward(

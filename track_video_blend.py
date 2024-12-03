@@ -20,7 +20,7 @@ class Tracker:
         data_name = os.path.basename(video_path).split('.')[0] if data_name is None else data_name
         output_path = os.path.join(f'outputs/{dir_path}', data_name) if dir_path else f'outputs/{data_name}'
         print('Building video data...')
-        fps = self.tracker.build_video(video_path, output_path, matting=True, background=0.0)
+        fps = self.tracker.build_video(video_path, output_path, matting=True, background=0.0, if_crop=False)
         if fps is None:
             return
         print('Building video data done!')
