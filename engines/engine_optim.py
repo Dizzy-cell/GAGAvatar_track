@@ -96,6 +96,9 @@ class OptimEngine:
                 'posecode': emica_posecode[idx].detach().float().cpu().numpy(),
                 'eyecode': eye_pose_code[idx].detach().float().cpu().numpy(),
                 'transform_matrix': transform_matrix[idx].detach().float().cpu().numpy(),
+                'landmarks':batch_base[idx]['landmarks'].detach().float().cpu().numpy(),
+                'blend':batch_base[idx]['blend'].detach().float().cpu().numpy(),
+                'matrix':batch_base[idx]['matrix'].detach().float().cpu().numpy(),
             }
         if batch_frames is not None:
             with torch.no_grad():
