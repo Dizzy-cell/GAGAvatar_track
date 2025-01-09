@@ -1,0 +1,1 @@
+python track_video_blend.py -v ./demos/obama.mp4
